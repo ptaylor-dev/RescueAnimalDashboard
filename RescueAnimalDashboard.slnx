@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="RescueAnimalDashboard.API/RescueAnimalDashboard.API.csproj" Id="864e7e27-c72b-4af0-9524-b837d3761c19" />
+  <Project Path="RescueAnimalDashboard.Application/RescueAnimalDashboard.Application.csproj" Id="6f6a6a43-23a8-40be-b2ac-24a934c405d3" />
+  <Project Path="RescueAnimalDashboard.Domain/RescueAnimalDashboard.Domain.csproj" />
+  <Project Path="RescueAnimalDashboard.Infrastructure/RescueAnimalDashboard.Infrastructure.csproj" Id="ace9ab21-3c6c-45a8-9546-8650397eb81a" />
+  <Project Path="RescueAnimalDashboard.Web/RescueAnimalDashboard.Web.csproj" Id="1a3e9471-6cbe-41ae-b114-b08fb5a95467" />
+</Solution>
