@@ -1,0 +1,71 @@
+﻿
+@using RescueAnimalDashboard.Domain.ValueObjects
+@using static LeafletForBlazor.techs.maps.Leaflet
+@using RescueAnimalDashboard.Web.Services.State
+@inject AppState State
+
+@if (_interactive)
+{
+    <div class="d-flex flex-wrap mt-4">
+        <div class="align-self-center d-inline">Selected Animal: @State.SelectedAnimal?.AnimalId</div>
+    </div>
+    <Map loadParameters="@loadParameters"
+         height="calc(80vh - 2rem)"
+         width="calc(80vw - 2rem)" />
+}
+else
+{
+    <p>Loading map...</p>
+}
+
+@code {
+    private bool _interactive;
+
+    [Parameter]
+    public Animal? SelectedAnimal { get; set; }
+    private Animal? _lastAnimalSelected;
+
+    private readonly LoadParameters loadParameters = new()
+    {
+        location = new Location
+        {
+            latitude = 30.75,
+            longitude = -97.48
+        },
+        zoomLevel = 10,
+        mapControls = new MapControls
+        {
+            layerList = new LayerList
+            {
+                position = Position.topRight
+            },
+            scaleBar = new ScaleBar
+            {
+                position = Position.bottomRight,
+                unitOfScaleBar = UnitOfScaleBar.imperial
+            }
+        }
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (SelectedAnimal != _lastAnimalSelected)
+        {
+            _lastAnimalSelected = SelectedAnimal;
+
+            if (SelectedAnimal != null && _interactive)
+            {
+                // TODO - add marker to map
+            }
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+}

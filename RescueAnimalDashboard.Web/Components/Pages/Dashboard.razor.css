@@ -1,0 +1,4 @@
+/* CSS for Dashboard component */
+.mud-table-dense .mud-table-cell {
+    padding: 4px 8px !important;
+}

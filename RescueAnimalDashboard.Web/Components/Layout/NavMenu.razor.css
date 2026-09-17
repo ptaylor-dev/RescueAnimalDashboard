@@ -22,6 +22,9 @@
 
 .navbar-brand {
     font-size: 1.1rem;
+    display: block;
+    margin: 0;
+    padding: 0;
 }
 
 .bi {

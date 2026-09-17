@@ -8,10 +8,11 @@
         DateOnly? dateOfBirth,
         DateTime? dateTime,
         string? name,
-        string? outcomeType,                // TODO - consider using enum
+        string? outcomeType,
         string outcomeSubtype,
-        string sexUponOutcome,                     // TDOD - consider using enum
+        string sexUponOutcome,
         GeoCoordinates geoCoordinates,
+        string ageUponOutcome,
         double ageUponOutcomeInWeeks)
     {
         public string AnimalId { get; init; } = animalId;
@@ -25,6 +26,23 @@
         public string? OutcomeSubtype { get; init; } = outcomeSubtype;
         public string? SexUponOutcome { get; init; } = sexUponOutcome;
         public GeoCoordinates? GeoCoordinates { get; init; } = geoCoordinates;
+        public string AgeUponOutcome { get; init; } = ageUponOutcome;
         public double AgeUponOutcomeInWeeks { get; init; } = ageUponOutcomeInWeeks;
+
+
+        public string ToString()
+        {
+            return $"{AnimalId}\n" +
+                $"{Type}\n" +
+                $"{Breed}\n" +
+                $"{Color}\n" +
+                $"{DateOfBirth}\n" +
+                $"{DateTime}\n" +
+                $"{Name}\n" +
+                $"{OutcomeType}\n" +
+                $"{OutcomeSubtype}\n" +
+                $"{AgeUponOutcome}\n" +
+                $"{AgeUponOutcomeInWeeks}\n";
+        }
     }
 }

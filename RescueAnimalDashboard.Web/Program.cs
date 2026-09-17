@@ -1,4 +1,7 @@
+using MudBlazor.Services;
 using RescueAnimalDashboard.Web.Components;
+using RescueAnimalDashboard.Web.Services.Api;
+using RescueAnimalDashboard.Web.Services.State;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,10 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient("RescueAnimalAPI", client =>
+// Add MudBlazor
+builder.Services.AddMudServices();
+
+// Add API service
+builder.Services.AddHttpClient<IAnimalApiClient, AnimalApiClient>(client =>
 {
     client.BaseAddress = new Uri("https://localhost:7193");
 });
+
+// Add state
+builder.Services.AddSingleton<AppState>();
 
 var app = builder.Build();
 

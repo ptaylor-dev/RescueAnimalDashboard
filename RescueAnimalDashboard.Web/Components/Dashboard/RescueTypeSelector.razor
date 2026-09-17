@@ -1,0 +1,15 @@
+﻿@using MudBlazor
+@using RescueAnimalDashboard.Web.Services.State
+@inject AppState State
+
+<MudChipSet T="string" CheckMark SelectionMode="SelectionMode.ToggleSelection">
+    <MudChip Color="Color.Primary" Value="@("water")">Water Rescue</MudChip>
+    <MudChip Color="Color.Primary" Value="@("mountain")">Mountain/Wilderness Rescue</MudChip>
+    <MudChip Color="Color.Primary" Value="@("disaster")">Disaster/Individual Tracking</MudChip>
+</MudChipSet>
+
+@code {
+    // TODO - Set colors for project
+    // TODO - Connect chips to state for filtering
+    // TODO - Add text to clearly indicate that a subset is/is not selected
+}

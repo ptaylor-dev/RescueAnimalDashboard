@@ -20,6 +20,7 @@ namespace RescueAnimalDashboard.Infrastructure.Repositories
         private readonly int SEX_UPON_OUTCOME_COLUMN = 12;
         private readonly int LATITUDE_COLUMN = 13;
         private readonly int LONGITUDE_COLUMN = 14;
+        private readonly int AGE_UPON_OUTCOME_COLUMN = 1;
         private readonly int OUTCOME_AGE_IN_WEEKS_COLUMN = 15;
         #endregion
 
@@ -65,6 +66,7 @@ namespace RescueAnimalDashboard.Infrastructure.Repositories
                             double.Parse(parsedLine[LATITUDE_COLUMN].Trim(' ', '"')),
                             double.Parse(parsedLine[LONGITUDE_COLUMN].Trim(' ', '"'))
                             ),
+                        parsedLine[AGE_UPON_OUTCOME_COLUMN].Trim(' ', '"'),
                         double.Parse(parsedLine[OUTCOME_AGE_IN_WEEKS_COLUMN].Trim(' ', '"'))
                         );
                     _animals.Add(animal);

@@ -1,0 +1,88 @@
+﻿@using MudBlazor
+@using RescueAnimalDashboard.Domain.ValueObjects
+@using RescueAnimalDashboard.Web.Services.State
+@inject AppState State
+
+<MudTable Items="@Animals"
+          FixedHeader="true"
+          FixedFooter="true"
+          Hover="true"
+          Dense="true"
+          Striped="true"
+          SortLabel="SortBy"
+          Filter="new Func<Animal,bool>(FilterFunc)"
+          @bind-SelectedItem="SelectedAnimal"
+          Height="400px">
+    <ToolBarContent>
+        <RescueTypeSelector />
+        <MudSpacer />
+        <MudTextField @bind-Value="State.SearchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>    
+    <HeaderContent>
+        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Animal, object>(x => x.AnimalId)">Animal ID</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.Type)">Type</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.Breed)">Breed</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.Color)">Color</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.DateOfBirth)">Date Of Birth</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.DateTime)">DateTime</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.OutcomeType)">Outcome Type</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.OutcomeSubtype)">Outcome Subtype</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.SexUponOutcome)">Sex Upon Outcome</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.AgeUponOutcomeInWeeks)">Age Upon Outcome</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTh DataLabel="Animal ID">@context.AnimalId</MudTh>
+            <MudTh DataLabel="Type">@context.Type</MudTh>
+            <MudTh DataLabel="Breed">@context.Breed</MudTh>
+            <MudTh DataLabel="Color">@context.Color</MudTh>
+            <MudTh DataLabel="Date of Birth">@context.DateOfBirth</MudTh>
+            <MudTh DataLabel="DateTime">@context.DateTime</MudTh>
+            <MudTh DataLabel="Name">@context.Name</MudTh>
+            <MudTh DataLabel="Outcome Type">@context.OutcomeType</MudTh>
+            <MudTh DataLabael="Outcome Subtype">@context.OutcomeSubtype</MudTh>
+            <MudTh DataLabel="Sex Upon Outcome">@context.SexUponOutcome</MudTh>
+            <MudTh DataLabel="Age Upon Outcome">@context.AgeUponOutcome</MudTh>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }" />
+        </PagerContent>
+    </MudTable>
+
+    <div class="d-flex flex-wrap mt-4">
+        <MudText class="align-self-center d-inline">Selected Animal: @SelectedAnimal?.AnimalId</MudText>
+    </div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IEnumerable<Animal> Animals { get; set; }
+
+    private Animal? _selectedAnimal;
+
+    [Parameter]
+    public Animal? SelectedAnimal
+    {
+        get => _selectedAnimal;
+        set
+        {
+            if (_selectedAnimal == value) return;
+            _selectedAnimal = value;
+            // Tell the parent page that a new animal was selected
+            SelectedAnimalChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Animal?> SelectedAnimalChanged { get; set; }
+
+    private bool FilterFunc(Animal animal)
+    {
+        if (string.IsNullOrWhiteSpace(State.SearchString))
+            return true;
+
+        if (animal.ToString().Contains(State.SearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+}

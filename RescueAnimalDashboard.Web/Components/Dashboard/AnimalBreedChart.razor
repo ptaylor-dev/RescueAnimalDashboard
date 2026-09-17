@@ -1,0 +1,57 @@
+﻿@using MudBlazor
+@using RescueAnimalDashboard.Web.Services.State
+@inject AppState State
+
+<MudChart
+    T="int" 
+    ChartType="ChartType.Bar"
+    ChartSeries="@_series" 
+    ChartLabels="@_xAxisLabels"
+    ChartOptions="@_options"
+    Width="100%" Height="350px" />
+
+@code {
+    private readonly int NUMBER_OF_RECORDS = 25;
+
+    private string?[] _breedNames = [];
+    private int[] _breedCounts = [];
+
+    private readonly BarChartOptions _options = new()
+    { 
+        ShowValues = true,
+        XAxisTitle = "Breeds in selected data (top 25)",
+        YAxisTitle = "Number of animals in data",
+        XAxisLabelRotation = 90,
+    };
+
+    private readonly List<ChartSeries<int>> _series =
+    [
+        new() {}
+    ];
+
+    private string?[] _xAxisLabels = { };
+
+    private void CountBreeds()
+    {
+        var groupedBreeds = State.FilteredAnimals
+        .GroupBy(a => a.Breed, StringComparer.OrdinalIgnoreCase)    // Ignore case, i.e. treat Labrador and labrador as the same breed
+        .Select(g => (Breed: g.Key, Count: g.Count()))
+        .OrderByDescending(x => x.Count)
+        .ThenBy(x => x.Breed)                                       // Secondary sort makes sorting stable
+        .Take(NUMBER_OF_RECORDS)                                    // Limit number of records
+        .ToList();
+
+        _xAxisLabels = groupedBreeds
+            .Select(x => x.Breed)
+            .ToArray();
+
+        _series[0].Data = groupedBreeds
+            .Select(x => x.Count)
+            .ToArray();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CountBreeds();
+    }
+}
