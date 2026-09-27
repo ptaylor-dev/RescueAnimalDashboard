@@ -1,16 +1,19 @@
 ﻿@page "/dashboard"
 <!-- Interactive mode needed to keep component from rendering as static SSR -->
 @rendermode InteractiveServer
+@implements IDisposable
 
+@using RescueAnimalDashboard.Domain.ValueObjects
 @using RescueAnimalDashboard.Web.Components.Dashboard
 @using RescueAnimalDashboard.Web.Services.State
-@inject AppState State
+@inject DashboardState State
 
 <h3>Dashboard</h3>
 
 <AnimalTable
-    Animals="State.FilteredAnimals"
-    @bind-SelectedAnimal="State.SelectedAnimal"/>
+    Animals="State.VisibleAnimals"
+    SelectedAnimal="State.SelectedAnimal"
+    SelectedAnimalChanged="OnSelectedAnimalChanged"/>
 <div class="d-flex">
     <div class="col-sm-12 col-md-6">
         <AnimalBreedChart />
@@ -23,6 +26,17 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
+        State.OnChange += StateHasChanged;
         await State.LoadAsync();
+    }
+
+    public void Dispose()
+    {
+        State.OnChange -= StateHasChanged;
+    }
+
+    private void OnSelectedAnimalChanged(Animal? animal)
+    {
+        State.SetSelectedAnimal(animal);
     }
 }

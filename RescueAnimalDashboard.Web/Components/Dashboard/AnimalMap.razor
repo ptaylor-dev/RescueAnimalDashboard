@@ -1,15 +1,14 @@
 ﻿
 @using RescueAnimalDashboard.Domain.ValueObjects
 @using static LeafletForBlazor.techs.maps.Leaflet
-@using RescueAnimalDashboard.Web.Services.State
-@inject AppState State
 
 @if (_interactive)
 {
     <div class="d-flex flex-wrap mt-4">
-        <div class="align-self-center d-inline">Selected Animal: @State.SelectedAnimal?.AnimalId</div>
+        <div class="align-self-center d-inline">Selected Animal: @SelectedAnimal?.AnimalId</div>
     </div>
-    <Map loadParameters="@loadParameters"
+    <Map @ref="_map"
+         loadParameters="@loadParameters"
          height="calc(80vh - 2rem)"
          width="calc(80vw - 2rem)" />
 }
@@ -19,6 +18,7 @@ else
 }
 
 @code {
+    Map? _map = null;
     private bool _interactive;
 
     [Parameter]
@@ -47,25 +47,71 @@ else
         }
     };
 
-    protected override void OnParametersSet()
-    {
-        if (SelectedAnimal != _lastAnimalSelected)
-        {
-            _lastAnimalSelected = SelectedAnimal;
 
-            if (SelectedAnimal != null && _interactive)
-            {
-                // TODO - add marker to map
-            }
-        }
+    protected override async Task OnParametersSetAsync()
+    {
+        await TryShowSelectedAnimalAsync();
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender)
         {
-            _interactive = true;
-            StateHasChanged();
+            return;
         }
+
+        await TryShowSelectedAnimalAsync();
+
+        _interactive = true;
+        StateHasChanged();
+    }
+
+    private async Task TryShowSelectedAnimalAsync()
+    {
+        if (!_interactive || _map is null || SelectedAnimal is null)
+            return;
+
+        if (SelectedAnimal == _lastAnimalSelected)
+            return;
+
+        if (!TryGetCoordinates(SelectedAnimal, out double latitude, out double longitude))
+            return;
+
+        await AddMarkerAsync(latitude, longitude);
+    }
+
+    private static bool TryGetCoordinates(Animal animal, out double latitude, out double longitude)
+    {
+        // Initialize output variables
+        latitude = 0;
+        longitude = 0;
+
+        // Make sure coordinates exist
+        if (animal.GeoCoordinates?.Latitude is null || animal.GeoCoordinates?.Longitude is null)
+            return false;
+
+        latitude = animal.GeoCoordinates.Latitude;
+        longitude = animal.GeoCoordinates.Longitude;
+
+        return latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
+    }
+
+    private async Task AddMarkerAsync(double latitude, double longitude)
+    {
+        var animalcoordinates = new Coordinates()
+            {
+                xy = new double[2] { latitude, longitude }
+            };
+        var animalPoint = new StreamPoint()
+            {
+                coordinates = animalcoordinates
+            };
+
+        // TODO - This does not remove the points from the map, just from the list of points. Need to figure out how to remove points from map!!
+        await _map.Geometric?.Points.Remove();
+
+        await _map.Geometric?.Points.Add(new List<StreamPoint>() { animalPoint });
+
+
     }
 }

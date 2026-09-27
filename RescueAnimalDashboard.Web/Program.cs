@@ -19,7 +19,7 @@ builder.Services.AddHttpClient<IAnimalApiClient, AnimalApiClient>(client =>
 });
 
 // Add state
-builder.Services.AddSingleton<AppState>();
+builder.Services.AddSingleton<DashboardState>();
 
 var app = builder.Build();
 

@@ -1,15 +1,26 @@
 ﻿@using MudBlazor
+@using RescueAnimalDashboard.Application.Services
 @using RescueAnimalDashboard.Web.Services.State
-@inject AppState State
+@inject DashboardState State
 
-<MudChipSet T="string" CheckMark SelectionMode="SelectionMode.ToggleSelection">
-    <MudChip Color="Color.Primary" Value="@("water")">Water Rescue</MudChip>
-    <MudChip Color="Color.Primary" Value="@("mountain")">Mountain/Wilderness Rescue</MudChip>
-    <MudChip Color="Color.Primary" Value="@("disaster")">Disaster/Individual Tracking</MudChip>
+<MudChipSet T="RescueCategory" 
+            SelectedValue="_selected" 
+            SelectedValueChanged="OnRescueCategoryChanged"
+            CheckMark="true"
+            SelectionMode="SelectionMode.ToggleSelection">
+    <MudChip Color="Color.Primary" Value="@(RescueCategory.Water)">Water Rescue</MudChip>
+    <MudChip Color="Color.Primary" Value="@(RescueCategory.Mountain)">Mountain/Wilderness Rescue</MudChip>
+    <MudChip Color="Color.Primary" Value="@(RescueCategory.Disaster)">Disaster/Individual Tracking</MudChip>
 </MudChipSet>
 
 @code {
+    private RescueCategory _selected = RescueCategory.None;
     // TODO - Set colors for project
-    // TODO - Connect chips to state for filtering
     // TODO - Add text to clearly indicate that a subset is/is not selected
+
+    private void OnRescueCategoryChanged(RescueCategory category)
+    {
+        _selected = category;
+        State.SetRescueCategory(_selected);
+    }
 }

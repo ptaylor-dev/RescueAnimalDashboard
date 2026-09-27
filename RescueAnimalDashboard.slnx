@@ -4,4 +4,6 @@
   <Project Path="RescueAnimalDashboard.Domain/RescueAnimalDashboard.Domain.csproj" />
   <Project Path="RescueAnimalDashboard.Infrastructure/RescueAnimalDashboard.Infrastructure.csproj" Id="ace9ab21-3c6c-45a8-9546-8650397eb81a" />
   <Project Path="RescueAnimalDashboard.Web/RescueAnimalDashboard.Web.csproj" Id="1a3e9471-6cbe-41ae-b114-b08fb5a95467" />
+  <Project Path="Sorting/Sorting.csproj" Id="5dc07dba-da42-48d1-9d44-9003906139da" />
+  <Project Path="TestSorting/TestSorting.csproj" Id="53996c43-c68b-459a-b00c-680c4f5f42d5" />
 </Solution>

@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RescueAnimalDashboard.Application\RescueAnimalDashboard.Application.csproj" />
     <ProjectReference Include="..\RescueAnimalDashboard.Domain\RescueAnimalDashboard.Domain.csproj" />
+    <ProjectReference Include="..\Sorting\Sorting.csproj" />
   </ItemGroup>
 
   <ItemGroup>

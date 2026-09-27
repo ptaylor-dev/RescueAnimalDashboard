@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RescueAnimalDashboard.Domain\RescueAnimalDashboard.Domain.csproj" />
+    <ProjectReference Include="..\Sorting\Sorting.csproj" />
   </ItemGroup>
 
 </Project>
