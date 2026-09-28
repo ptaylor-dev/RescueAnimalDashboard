@@ -13,8 +13,14 @@ namespace RescueAnimalDashboard.Web.Services.State
 
         private List<Animal> _animals = [];
         private List<Animal> _visibleAnimals = [];
+
+        // Uses reference based lookup
+        private Dictionary<Animal, string> _searchText = new(ReferenceEqualityComparer.Instance);
         public IReadOnlyList<Animal> Animals => _animals;
         public IReadOnlyList<Animal> VisibleAnimals => _visibleAnimals;
+
+        // Shared load task to eliminate duplicate API calls
+        private Task? _loadTask;
 
 
         // Creating set methods for these properties allows for updating subscribers of change and additional logic
@@ -30,17 +36,31 @@ namespace RescueAnimalDashboard.Web.Services.State
             _apiClient = apiClient;
         }
 
-        public async Task LoadAsync(CancellationToken ct = default)
+
+
+        public async Task LoadAsync() => _loadTask ??= LoadCoreAsync();
+
+        private async Task LoadCoreAsync()
         {
-            if (Animals.Count > 0)
+            try
             {
-                return;
+                var animals = await _apiClient.GetAnimalsAsync();
+
+                _searchText = new Dictionary<Animal, string>(animals.Count, ReferenceEqualityComparer.Instance);
+                foreach (var animal in animals)
+                {
+                    _searchText[animal] = animal.ToString().ToLowerInvariant();
+                }
+
+                _animals = ApplySort(animals);
+                ApplyFilters();
+                NotifyStateChanged();
             }
-
-            _animals = await _apiClient.GetAnimalsAsync(ct);
-
-            UpdateVisableAnimals();
-            NotifyStateChanged();
+            catch
+            {
+                _loadTask = null;   // Setting to null allows a retry from another caller
+                throw;
+            }
         }
 
         public void SetSelectedAnimal(Animal? animal)
@@ -56,14 +76,14 @@ namespace RescueAnimalDashboard.Web.Services.State
         public void SetRescueCategory(RescueCategory category)
         {
             RescueCategory = category;
-            UpdateVisableAnimals();
+            ApplyFilters();
             NotifyStateChanged();
         }
 
         public void SetSearchString(string value)
         {
             SearchString = value?.Trim() ?? String.Empty;
-            UpdateVisableAnimals();
+            ApplyFilters();
             NotifyStateChanged();
         }
 
@@ -77,13 +97,14 @@ namespace RescueAnimalDashboard.Web.Services.State
 
             SortOption = sortOption;
             SortAscending = ascending;
+
+            // Sort master list once to preserve order with filter changes
+            _animals = ApplySort(_animals);
+            ApplyFilters();
         }
 
-        public void UpdateVisableAnimals()
+        public void ApplyFilters()
         {
-            // Sort master list of animals. Sorting before filtering will maintain cascaded sort ordering regardless of filtering.
-            _animals = ApplySort(_animals);
-
             // Filter by search text and rescue criteria
             _visibleAnimals = [.. _animals
                 .Where(ApplyRescueCriteria)
@@ -95,10 +116,9 @@ namespace RescueAnimalDashboard.Web.Services.State
             if (string.IsNullOrWhiteSpace(SearchString))
                 return true;
 
-            if (animal.ToString().Contains(SearchString, StringComparison.OrdinalIgnoreCase))
-                return true;
+            var animalIsValid = _searchText.TryGetValue(animal, out var text);
 
-            return false;
+            return animalIsValid && text is not null && text.Contains(SearchString, StringComparison.OrdinalIgnoreCase);
         }
 
         private List<Animal> ApplySort(List<Animal> animals)

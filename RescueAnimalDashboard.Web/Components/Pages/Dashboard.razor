@@ -1,6 +1,4 @@
 ﻿@page "/dashboard"
-<!-- Interactive mode needed to keep component from rendering as static SSR -->
-@rendermode InteractiveServer
 @implements IDisposable
 
 @using RescueAnimalDashboard.Domain.ValueObjects
@@ -11,7 +9,6 @@
 <h3>Dashboard</h3>
 
 <AnimalTable
-    Animals="State.VisibleAnimals"
     SelectedAnimal="State.SelectedAnimal"
     SelectedAnimalChanged="OnSelectedAnimalChanged"/>
 <div class="d-flex">

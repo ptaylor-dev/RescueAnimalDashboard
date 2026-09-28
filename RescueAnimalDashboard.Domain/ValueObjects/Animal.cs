@@ -30,19 +30,19 @@
         public double AgeUponOutcomeInWeeks { get; init; } = ageUponOutcomeInWeeks;
 
 
-        public string ToString()
-        {
-            return $"{AnimalId}\n" +
-                $"{Type}\n" +
-                $"{Breed}\n" +
-                $"{Color}\n" +
-                $"{DateOfBirth}\n" +
-                $"{DateTime}\n" +
-                $"{Name}\n" +
-                $"{OutcomeType}\n" +
-                $"{OutcomeSubtype}\n" +
-                $"{AgeUponOutcome}\n" +
-                $"{AgeUponOutcomeInWeeks}\n";
-        }
+        public override string ToString() =>
+            $"""
+            {AnimalId}
+            {Type}
+            {Breed}
+            {Color}
+            {DateOfBirth}
+            {DateTime}
+            {Name}
+            {OutcomeType}
+            {OutcomeSubtype}
+            {SexUponOutcome}
+            {AgeUponOutcome}
+            """;
     }
 }

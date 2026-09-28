@@ -1,42 +1,37 @@
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using RescueAnimalDashboard.Web.Components;
 using RescueAnimalDashboard.Web.Services.Api;
 using RescueAnimalDashboard.Web.Services.State;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+// Root components
+builder.RootComponents.Add<Routes>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // Add MudBlazor
 builder.Services.AddMudServices();
 
-// Add API service
+// Add API service (URL comes from wwwroot/appsettings*.json)
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
+if (string.IsNullOrWhiteSpace(apiBaseUrl))
+{
+    throw new InvalidOperationException("ApiBaseUrl is missing from wwwroot/appsettings.json.");
+}
+
 builder.Services.AddHttpClient<IAnimalApiClient, AnimalApiClient>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7193");
+    client.BaseAddress = new Uri(apiBaseUrl);
 });
 
 // Add state
 builder.Services.AddSingleton<DashboardState>();
 
-var app = builder.Build();
+var host = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
+// Start loading data immediately. Dashboard awaits the same task.
+_ = host.Services.GetRequiredService<DashboardState>().LoadAsync();
 
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.Run();
+await host.RunAsync();
