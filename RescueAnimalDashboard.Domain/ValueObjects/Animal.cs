@@ -3,16 +3,17 @@
     public class Animal(
         string animalId,
         string type,
-        string breed,
-        string color,
+        string? breed,
+        string? color,
         DateOnly? dateOfBirth,
         DateTime? dateTime,
         string? name,
         string? outcomeType,
-        string outcomeSubtype,
-        string sexUponOutcome,
-        GeoCoordinates geoCoordinates,
-        string ageUponOutcome,
+        string? outcomeSubtype,
+        string? sexUponOutcome,
+        double latitude,
+        double longitude,
+        string? ageUponOutcome,
         double ageUponOutcomeInWeeks)
     {
         public string AnimalId { get; init; } = animalId;
@@ -25,8 +26,9 @@
         public string? OutcomeType { get; init; } = outcomeType;
         public string? OutcomeSubtype { get; init; } = outcomeSubtype;
         public string? SexUponOutcome { get; init; } = sexUponOutcome;
-        public GeoCoordinates? GeoCoordinates { get; init; } = geoCoordinates;
-        public string AgeUponOutcome { get; init; } = ageUponOutcome;
+        public double Latitude { get; init; } = latitude;
+        public double Longitude { get; init; } = longitude;
+        public string? AgeUponOutcome { get; init; } = ageUponOutcome;
         public double AgeUponOutcomeInWeeks { get; init; } = ageUponOutcomeInWeeks;
 
 

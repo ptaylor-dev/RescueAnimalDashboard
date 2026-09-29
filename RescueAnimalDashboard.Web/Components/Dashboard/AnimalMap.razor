@@ -85,15 +85,8 @@ else
     private static bool TryGetCoordinates(Animal animal, out double latitude, out double longitude)
     {
         // Initialize output variables
-        latitude = 0;
-        longitude = 0;
-
-        // Make sure coordinates exist
-        if (animal.GeoCoordinates?.Latitude is null || animal.GeoCoordinates?.Longitude is null)
-            return false;
-
-        latitude = animal.GeoCoordinates.Latitude;
-        longitude = animal.GeoCoordinates.Longitude;
+        latitude = animal.Latitude;
+        longitude = animal.Longitude;
 
         return latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
     }
@@ -110,9 +103,9 @@ else
             };
 
         // TODO - This does not remove the points from the map, just from the list of points. Need to figure out how to remove points from map!!
-        await _map.Geometric?.Points.Remove();
+        await _map?.Geometric?.Points.Remove()!;
 
-        await _map.Geometric?.Points.Add(new List<StreamPoint>() { animalPoint });
+        await _map?.Geometric?.Points.Add(new List<StreamPoint>() { animalPoint })!;
 
 
     }
