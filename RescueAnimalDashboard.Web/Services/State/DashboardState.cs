@@ -3,6 +3,7 @@ using RescueAnimalDashboard.Application.Services;
 using RescueAnimalDashboard.Domain.ValueObjects;
 using RescueAnimalDashboard.Web.Services.Api;
 using Sorting;
+using System.Diagnostics;
 
 namespace RescueAnimalDashboard.Web.Services.State
 {
@@ -46,6 +47,7 @@ namespace RescueAnimalDashboard.Web.Services.State
             {
                 var animals = await _apiClient.GetAnimalsAsync();
 
+                // Create a string of all searchable fields in each animal and add to a dictionary (hashtable)
                 _searchText = new Dictionary<Animal, string>(animals.Count, ReferenceEqualityComparer.Instance);
                 foreach (var animal in animals)
                 {
@@ -56,8 +58,9 @@ namespace RescueAnimalDashboard.Web.Services.State
                 ApplyFilters();
                 NotifyStateChanged();
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine(ex.ToString());
                 _loadTask = null;   // Setting to null allows a retry from another caller
                 throw;
             }
