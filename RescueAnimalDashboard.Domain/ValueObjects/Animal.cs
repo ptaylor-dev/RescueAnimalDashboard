@@ -30,6 +30,8 @@
         public double Longitude { get; init; } = longitude;
         public string? AgeUponOutcome { get; init; } = ageUponOutcome;
         public double AgeUponOutcomeInWeeks { get; init; } = ageUponOutcomeInWeeks;
+        public bool HasValidCoordinates =>
+            Latitude is >= -90 and <= 90 && Longitude is >= -180 and <= 180;
 
 
         public override string ToString() =>

@@ -1,112 +1,109 @@
-﻿
+﻿@using Microsoft.JSInterop
 @using RescueAnimalDashboard.Domain.ValueObjects
-@using static LeafletForBlazor.techs.maps.Leaflet
+@implements IAsyncDisposable
+@inject IJSRuntime JS
 
-@if (_interactive)
-{
-    <div class="d-flex flex-wrap mt-4">
-        <div class="align-self-center d-inline">Selected Animal: @SelectedAnimal?.AnimalId</div>
-    </div>
-    <Map @ref="_map"
-         loadParameters="@loadParameters"
-         height="calc(80vh - 2rem)"
-         width="calc(80vw - 2rem)" />
-}
-else
-{
-    <p>Loading map...</p>
-}
+<div id="@_mapElementId" class="animal-map"></div>
+
 
 @code {
-    Map? _map = null;
-    private bool _interactive;
+    // Constants
+    private const double DefaultLatitude = 30.75;
+    private const double DefaultLongitude = -97.48;
+    private const int DefaultZoom = 10;
 
     [Parameter]
     public Animal? SelectedAnimal { get; set; }
     private Animal? _lastAnimalSelected;
 
-    private readonly LoadParameters loadParameters = new()
-    {
-        location = new Location
-        {
-            latitude = 30.75,
-            longitude = -97.48
-        },
-        zoomLevel = 10,
-        mapControls = new MapControls
-        {
-            layerList = new LayerList
-            {
-                position = Position.topRight
-            },
-            scaleBar = new ScaleBar
-            {
-                position = Position.bottomRight,
-                unitOfScaleBar = UnitOfScaleBar.imperial
-            }
-        }
-    };
+    private readonly string _mapElementId = $"animal-map-{Guid.NewGuid():N}";   // Generates unique ID
 
+    private IJSObjectReference? _mapModule;
+    private bool _mapInitialized;
 
-    protected override async Task OnParametersSetAsync()
-    {
-        await TryShowSelectedAnimalAsync();
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
+        // Load JavaScript module on first render
+        if (firstRender)
         {
-            return;
+            _mapModule = await JS.InvokeAsync<IJSObjectReference>(
+                "import",
+                "./js/animalMap.js");
+
+            await _mapModule.InvokeVoidAsync(
+                "initialize",
+                _mapElementId,
+                DefaultLatitude,
+                DefaultLongitude,
+                DefaultZoom);
+
+            _mapInitialized = true;
         }
 
-        await TryShowSelectedAnimalAsync();
-
-        _interactive = true;
-        StateHasChanged();
+        if (_mapInitialized && !ReferenceEquals(SelectedAnimal, _lastAnimalSelected))
+        {
+            await UpdateSelectedAnimalMarkerAsync();
+        }
     }
 
-    private async Task TryShowSelectedAnimalAsync()
+    private async Task UpdateSelectedAnimalMarkerAsync()
     {
-        if (!_interactive || _map is null || SelectedAnimal is null)
-            return;
-
-        if (SelectedAnimal == _lastAnimalSelected)
+        if (_mapModule is null || ReferenceEquals(SelectedAnimal, _lastAnimalSelected))
             return;
 
         _lastAnimalSelected = SelectedAnimal;
 
-        if (!TryGetCoordinates(SelectedAnimal, out double latitude, out double longitude))
+        if (SelectedAnimal is null || !SelectedAnimal.HasValidCoordinates)
+        {
+            // Clear marker if nothing selected
+            await _mapModule.InvokeVoidAsync("clearSelectedAnimal", _mapElementId);
+            return;
+        }
+
+        await AddMarkerAsync();
+    }
+
+    private async Task AddMarkerAsync()
+    {
+        if (_mapModule is null || SelectedAnimal is null)
             return;
 
-        await AddMarkerAsync(latitude, longitude);
+        var title = SelectedAnimal.Name ?? SelectedAnimal.AnimalId;
+
+        // Adds popup with animal info
+        var popupHtml = $"""
+            <strong>{System.Net.WebUtility.HtmlEncode(SelectedAnimal.Name ?? "Unnamed animal")}</strong><br>
+            ID: {System.Net.WebUtility.HtmlEncode(SelectedAnimal.AnimalId)}<br>
+            Breed: {System.Net.WebUtility.HtmlEncode(SelectedAnimal.Breed ?? "unknown")}
+            """;
+
+        await _mapModule.InvokeVoidAsync(
+            "setSelectedAnimal",
+            _mapElementId,
+            SelectedAnimal.Latitude,
+            SelectedAnimal.Longitude,
+            title,
+            popupHtml
+        );
     }
 
-    private static bool TryGetCoordinates(Animal animal, out double latitude, out double longitude)
+    public async ValueTask DisposeAsync()
     {
-        // Initialize output variables
-        latitude = animal.Latitude;
-        longitude = animal.Longitude;
+        if (_mapModule is null)
+        {
+            return;
+        }
 
-        return latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
-    }
+        try
+        {
 
-    private async Task AddMarkerAsync(double latitude, double longitude)
-    {
-        var animalcoordinates = new Coordinates()
-            {
-                xy = new double[2] { latitude, longitude }
-            };
-        var animalPoint = new StreamPoint()
-            {
-                coordinates = animalcoordinates
-            };
-
-        // TODO - This does not remove the points from the map, just from the list of points. Need to figure out how to remove points from map!!
-        await _map?.Geometric?.Points.Remove()!;
-
-        await _map?.Geometric?.Points.Add(new List<StreamPoint>() { animalPoint })!;
-
-
+            await _mapModule.InvokeVoidAsync("dispose", _mapElementId);
+            await _mapModule.DisposeAsync();
+        }
+        catch(JSDisconnectedException)
+        {
+            // If the browser/Blazor runtime is already shutting down no JS cleanup can occur
+        }
     }
 }

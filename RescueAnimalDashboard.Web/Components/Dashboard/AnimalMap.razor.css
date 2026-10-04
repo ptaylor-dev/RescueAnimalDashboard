@@ -1,0 +1,8 @@
+/* CSS for AnimalMap component */
+
+.animal-map {
+    width: 100%;
+    height: 420px;
+    border-radius: 8px;
+    overflow: hidden;
+}

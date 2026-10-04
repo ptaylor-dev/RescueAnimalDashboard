@@ -1,7 +1,7 @@
-using RescueAnimalDashboard.Infrastructure.Persistence.Context;
-using RescueAnimalDashboard.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using RescueAnimalDashboard.Domain.Interfaces;
+using RescueAnimalDashboard.Infrastructure;
+using RescueAnimalDashboard.Infrastructure.Persistence.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
