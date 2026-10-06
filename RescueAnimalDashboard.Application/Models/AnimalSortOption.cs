@@ -1,4 +1,4 @@
-﻿namespace RescueAnimalDashboard.Web.Services.State
+﻿namespace RescueAnimalDashboard.Application.Models
 {
     public enum AnimalSortOption
     {

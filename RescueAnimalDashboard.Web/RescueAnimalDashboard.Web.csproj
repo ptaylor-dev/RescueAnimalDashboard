@@ -8,11 +8,11 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LeafletForBlazor" Version="4.0.8.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.12" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.12" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
-    <PackageReference Include="MudBlazor" Version="9.10.0" />
+    <PackageReference Include="MudBlazor" Version="9.11.0" />
   </ItemGroup>
 
   <ItemGroup>

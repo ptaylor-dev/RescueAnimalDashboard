@@ -1,4 +1,4 @@
-﻿using RescueAnimalDashboard.Domain.ValueObjects;
+﻿using RescueAnimalDashboard.Domain.Models;
 using RescueAnimalDashboard.Infrastructure.Persistence.Entities;
 using RescueAnimalDashboard.Infrastructure.Utilities;
 
@@ -35,13 +35,17 @@ namespace RescueAnimalDashboard.Infrastructure.Persistence.Seeding
             })];
         }
 
-        private static T? GetOrCreate<T>(Dictionary<string, T> cache, string? name, Func<string, T> create)
+        private static T? GetOrCreate<T>(
+            Dictionary<string, T> cache,
+            string? name,
+            Func<string, T> create)
             where T : LookupRecord
         {
             if (name is null)
                 return null;
 
-            // If name already exists in cache, return the record so that the appropriate lookup table entry is used.
+            // If name already exists in cache, return the record
+            // so that the appropriate lookup table entry is used.
             if (!cache.TryGetValue(name, out var record))
             {
                 record = create(name);

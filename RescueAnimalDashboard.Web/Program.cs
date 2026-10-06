@@ -31,7 +31,4 @@ builder.Services.AddSingleton<DashboardState>();
 
 var host = builder.Build();
 
-// Start loading data immediately. Dashboard awaits the same task.
-_ = host.Services.GetRequiredService<DashboardState>().LoadAsync();
-
 await host.RunAsync();

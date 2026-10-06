@@ -1,4 +1,4 @@
-﻿namespace RescueAnimalDashboard.Domain.ValueObjects
+﻿namespace RescueAnimalDashboard.Domain.Models
 {
     public class Animal(
         string animalId,

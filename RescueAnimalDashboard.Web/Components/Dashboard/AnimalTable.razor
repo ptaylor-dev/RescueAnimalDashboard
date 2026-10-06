@@ -1,23 +1,31 @@
 ﻿@using MudBlazor
-@using RescueAnimalDashboard.Domain.ValueObjects
+@using RescueAnimalDashboard.Application.Models
+@using RescueAnimalDashboard.Domain.Models
+@using RescueAnimalDashboard.Web.Services.Api
 @using RescueAnimalDashboard.Web.Services.State
+
 @implements IDisposable
+
 @inject DashboardState State
+@inject IAnimalApiClient AnimalApi
+@inject ILogger<AnimalTable> Logger
 
 <MudTable T="Animal"
           @ref="_table"
           ServerData="LoadAnimals"
+          RowsPerPage="10"
           FixedHeader="true"
           FixedFooter="true"
           Hover="true"
           Dense="true"
           Striped="true"
-          @bind-SelectedItem="SelectedAnimal"
+          SelectedItem="@State.SelectedAnimal"
+          SelectedItemChanged="OnSelectedAnimalChanged"
           Height="400px">
     <ToolBarContent>
         <RescueTypeSelector />
         <MudSpacer />
-        <!-- Debouncing keeps the data sorting and filtering from happeneing on every key stroke to improve response -->
+        <!-- Debouncing keeps the server from being called after every key stroke -->
         <MudTextField T="string"
             Value="@State.SearchString"
             ValueChanged="OnSearchChanged"
@@ -61,83 +69,117 @@
     </MudTable>
 
     <div class="d-flex flex-wrap mt-4">
-        <MudText class="align-self-center d-inline">Selected Animal: @SelectedAnimal?.AnimalId</MudText>
+        <MudText class="align-self-center d-inline">Selected Animal: @(State.SelectedAnimal?.AnimalId ?? "None")</MudText>
     </div>
 
 @code {
+    private readonly int[] _pageSizeOptions = [10, 25, 50, 100];
 
     private MudTable<Animal>? _table;
-
-
-    private Animal? _selectedAnimal;
-
-    [Parameter]
-    public Animal? SelectedAnimal
-    {
-        get => _selectedAnimal;
-        set
-        {
-            if (_selectedAnimal == value) return;
-            _selectedAnimal = value;
-            // Tell the parent page that a new animal was selected
-            SelectedAnimalChanged.InvokeAsync(value);
-        }
-    }
+    private string? _errorMessage;
+    private long _loadVersion;
+    private bool _disposed;
 
     [Parameter]
     public EventCallback<Animal?> SelectedAnimalChanged { get; set; }
 
     protected override void OnInitialized()
     {
-        // Subscribe to changes in dashboard state
-        State.OnChange += OnAppStateChanged;
+        State.FiltersChanged += OnFiltersChangedAsync;
     }
 
-    public void Dispose()
+    private Task OnSearchChanged(string? value)
     {
-        State.OnChange -= OnAppStateChanged;
+        return State.SetSearchStringAsync(value);
     }
 
-    private async void OnAppStateChanged()
+    private async Task OnSelectedAnimalChanged(Animal? animal)
     {
-        await InvokeAsync(async () =>
+        State.SetSelectedAnimal(animal);
+
+        await SelectedAnimalChanged.InvokeAsync(animal);
+    }
+
+    private Task OnFiltersChangedAsync()
+    {
+        return InvokeAsync(async () =>
         {
-            if (_table is not null)
+            if (_disposed || _table is null)
+                return;
+
+            if (_table.CurrentPage != 0)
+            {
+                // Changing pages causes the table to request server data.
+                _table.NavigateTo(0);
+            }
+            else
+            {
+                // Already on page zero: explicitly reload it.
                 await _table.ReloadServerData();
-
-            StateHasChanged();
+            }
         });
-    }
-
-    private async Task OnSearchChanged(string value)
-    {
-        State.SetSearchString(value);
-        await Task.CompletedTask;
     }
 
     private async Task<TableData<Animal>> LoadAnimals(TableState tableState, CancellationToken ct)
     {
-        // Load animals into state
-        await State.LoadAsync();
+        var loadVersion = ++_loadVersion;
 
-        // Pass sort options from UI to state
-        State.SetSort(
-            ToSortOption(tableState.SortLabel), 
-            tableState.SortDirection != SortDirection.Descending);
+        _errorMessage = null;
 
-        var visible = State.VisibleAnimals;
+        // Define no-sort behavior
+        var hasSort = tableState.SortDirection != SortDirection.None;
 
-        // Pagination logic
-        return new TableData<Animal>
+        var query = new AnimalQuery(
+            rescueType: State.RescueCategory,
+            searchText: State.SearchString,
+            sortBy: hasSort
+                ? ToSortOption(tableState.SortLabel)
+                : AnimalSortOption.AnimalId,
+            sortBySecondary: State.SecondarySortOption,
+            sortAscending: !hasSort ||
+                tableState.SortDirection == SortDirection.Ascending,
+            pageIndex: tableState.Page,
+            pageSize: tableState.PageSize,
+            breedCountLimit: DashboardState.ChartBreedCountLimit);
+
+        try
         {
-            TotalItems = visible.Count,
-            Items = visible
-                .Skip(tableState.Page * tableState.PageSize)
-                .Take(tableState.PageSize)
-                .ToList()
-        };
-    }
+            var response = await AnimalApi.GetAnimalsAsync(query, ct);
 
+            ct.ThrowIfCancellationRequested();
+
+            if (!_disposed && loadVersion == _loadVersion)
+            {
+                State.UpdatePage(query, response);
+            }
+
+            return new TableData<Animal>
+            {
+                Items = response.Animals,
+                TotalItems = response.TotalCount
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            // Cancellation is not an API failure.
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load the animal table.");
+
+            if (!_disposed && loadVersion == _loadVersion)
+            {
+                _errorMessage = "Unable to load animals. Please try again.";
+            }
+
+            return new TableData<Animal>
+            {
+                Items = Array.Empty<Animal>(),
+                TotalItems = 0
+            };
+        }
+    }
 
     private static AnimalSortOption ToSortOption(string? sortLabel)
     {
@@ -153,8 +195,15 @@
             "OutcomeType" => AnimalSortOption.OutcomeType,
             "OutcomeSubtype" => AnimalSortOption.OutcomeSubtype,
             "SexUponOutcome" => AnimalSortOption.SexUponOutcome,
-            "AgeUponOutcome" => AnimalSortOption.AgeUponOutcomeInWeeks,
+            "AgeUponOutcomeInWeeks" =>
+                AnimalSortOption.AgeUponOutcomeInWeeks,
             _ => AnimalSortOption.AnimalId
         };
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        State.FiltersChanged -= OnFiltersChangedAsync;
     }
 }

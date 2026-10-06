@@ -1,9 +1,11 @@
-﻿using RescueAnimalDashboard.Domain.ValueObjects;
+﻿using RescueAnimalDashboard.Application.Models;
 
 namespace RescueAnimalDashboard.Web.Services.Api
 {
     public interface IAnimalApiClient
     {
-        Task<List<Animal>> GetAnimalsAsync(CancellationToken ct = default);
+        Task<AnimalResponse> GetAnimalsAsync(
+            AnimalQuery query,
+            CancellationToken ct = default);
     }
 }

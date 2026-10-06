@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using RescueAnimalDashboard.Domain.Interfaces;
+using RescueAnimalDashboard.Application.Interfaces;
 using RescueAnimalDashboard.Infrastructure.Persistence.Context;
 using RescueAnimalDashboard.Infrastructure.Repositories;
+using Sorting;
 
 namespace RescueAnimalDashboard.Infrastructure
 {
@@ -15,8 +16,10 @@ namespace RescueAnimalDashboard.Infrastructure
                     .UseSnakeCaseNamingConvention());   // PostgreSQL standard naming convention
 
             // Use either Csv or Ef repository
-            //services.AddScoped<IAnimalRepository, CsvAnimalRepository>();
-            services.AddScoped<IAnimalRepository, EfAnimalRepository>();
+            services.AddScoped<IAnimalRepository, CsvAnimalRepository>();
+            //services.AddScoped<IAnimalRepository, EfAnimalRepository>();
+
+            services.AddScoped<ISorter, MergeSorter>();
 
             return services;
         }

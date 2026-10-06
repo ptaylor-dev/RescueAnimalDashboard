@@ -1,10 +1,10 @@
 ﻿@using MudBlazor
-@using RescueAnimalDashboard.Application.Services
+@using RescueAnimalDashboard.Domain.Models
 @using RescueAnimalDashboard.Web.Services.State
 @inject DashboardState State
 
 <MudChipSet T="RescueCategory" 
-            SelectedValue="_selected" 
+            SelectedValue="@State.RescueCategory" 
             SelectedValueChanged="OnRescueCategoryChanged"
             CheckMark="true"
             SelectionMode="SelectionMode.ToggleSelection">
@@ -13,14 +13,17 @@
     <MudChip Color="Color.Primary" Value="@(RescueCategory.Disaster)">Disaster/Individual Tracking</MudChip>
 </MudChipSet>
 
-@code {
-    private RescueCategory _selected = RescueCategory.None;
-    // TODO - Set colors for project
-    // TODO - Add text to clearly indicate that a subset is/is not selected
+<MudText>
+    @(State.RescueCategory == RescueCategory.None
+    ? "No rescue criteria selected."
+    : $"Filtering by {State.RescueCategory.ToString().ToLower()} rescue criteria.")
+</MudText>
 
-    private void OnRescueCategoryChanged(RescueCategory category)
+@code {
+    // TODO - Set colors for project
+
+    private Task OnRescueCategoryChanged(RescueCategory category)
     {
-        _selected = category;
-        State.SetRescueCategory(_selected);
+        return State.SetRescueCategoryAsync(category);
     }
 }

@@ -31,7 +31,7 @@
         public DateOnly? DateOfBirth { get; set; }
         public DateTime? DateTime { get; init; }
         public string? Name { get; init; }
-        public string? OutcomeSubtype { get; init; }    // TODO - Is OutcomeSubtype dependent on OutcomeType? Consider normalizing.
+        public string? OutcomeSubtype { get; init; }
         public double Latitude { get; init; }
         public double Longitude { get; init; }
         public string? AgeUponOutcome { get; init; }

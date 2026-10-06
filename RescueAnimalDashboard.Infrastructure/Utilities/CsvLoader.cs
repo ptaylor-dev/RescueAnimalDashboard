@@ -1,7 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
-using RescueAnimalDashboard.Domain.ValueObjects;
+using RescueAnimalDashboard.Domain.Models;
 using System.Globalization;
 
 namespace RescueAnimalDashboard.Infrastructure.Utilities
