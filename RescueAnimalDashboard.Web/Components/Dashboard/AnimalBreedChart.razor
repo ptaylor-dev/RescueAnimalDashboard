@@ -9,10 +9,10 @@
     ChartSeries="@_series" 
     ChartLabels="@_xAxisLabels"
     ChartOptions="@_options"
-    Width="100%" Height="350px" />
+    Width="100%" Height="100%" />
 
 @code {
-    private const int NUMBER_OF_RECORDS = 25;
+    private const int NumberOfRecords = 25;
 
     private string?[] _breedNames = [];
     private int[] _breedCounts = [];
@@ -22,7 +22,9 @@
         ShowValues = true,
         XAxisTitle = $"Breeds in selected data (top {DashboardState.ChartBreedCountLimit})",
         YAxisTitle = "Number of animals in data",
-        XAxisLabelRotation = 90,
+        XAxisLabelRotation = 60,
+        ShowLegend = false,
+        BarWidthRatio = .8,
     };
 
     private readonly List<ChartSeries<int>> _series =

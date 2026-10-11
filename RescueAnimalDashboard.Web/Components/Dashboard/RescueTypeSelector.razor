@@ -13,12 +13,6 @@
     <MudChip Color="Color.Primary" Value="@(RescueCategory.Disaster)">Disaster/Individual Tracking</MudChip>
 </MudChipSet>
 
-<MudText>
-    @(State.RescueCategory == RescueCategory.None
-    ? "No rescue criteria selected."
-    : $"Filtering by {State.RescueCategory.ToString().ToLower()} rescue criteria.")
-</MudText>
-
 @code {
     // TODO - Set colors for project
 

@@ -68,10 +68,6 @@
         </PagerContent>
     </MudTable>
 
-    <div class="d-flex flex-wrap mt-4">
-        <MudText class="align-self-center d-inline">Selected Animal: @(State.SelectedAnimal?.AnimalId ?? "None")</MudText>
-    </div>
-
 @code {
     private readonly int[] _pageSizeOptions = [10, 25, 50, 100];
 
