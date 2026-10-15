@@ -1,0 +1,81 @@
+name: Deploy Blazor WebAssembly to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Publish WebAssembly app
+        run: >
+          dotnet publish
+          RescueAnimalDashboard.Web/RescueAnimalDashboard.Web.csproj
+          --configuration Release
+          --output published
+
+      - name: Set GitHub Pages base path
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          index = Path("published/wwwroot/index.html")
+          html = index.read_text()
+          original = '<base href="/" />'
+
+          if original not in html:
+              raise SystemExit(
+                  'Expected <base href="/" /> in published index.html. '
+                  'Check the existing base tag.'
+              )
+
+          base = f'/{os.environ["REPOSITORY_NAME"]}/'
+          index.write_text(html.replace(original, f'<base href="{base}" />'))
+          PY
+
+      - name: Add static hosting marker
+        run: touch published/wwwroot/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: published/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
