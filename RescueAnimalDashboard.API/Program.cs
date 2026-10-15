@@ -35,7 +35,11 @@ builder.Services.AddInfrastructure(connectionString);
 var app = builder.Build();
 
 app.UseResponseCompression();
-app.UseHttpsRedirection();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("WebClient");
 
 // Configure the HTTP request pipeline.
@@ -45,6 +49,14 @@ if (app.Environment.IsDevelopment())
 }
 
 // Map API endpoints
+
+// Check API status without querying database
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "ok"
+}));
+
+// Parameterized database query
 app.MapGet("/animals", async (
     string? rescueType,
     string? searchText,
@@ -126,11 +138,17 @@ static IResult? TryParseEnum<TEnum>(
     });
 }
 
-// Apply migrations
-using (var scope = app.Services.CreateScope())
+// Apply migrations if container is available
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<RescueAnimalDbContext>();
     await db.Database.MigrateAsync();
+}
+catch (Exception ex)
+{
+    // Container is not available
+    Console.WriteLine(ex);
 }
 
 app.Run();
