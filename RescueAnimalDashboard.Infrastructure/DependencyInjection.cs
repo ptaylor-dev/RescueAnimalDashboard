@@ -16,8 +16,8 @@ namespace RescueAnimalDashboard.Infrastructure
                     .UseSnakeCaseNamingConvention());   // PostgreSQL standard naming convention
 
             // Use either Csv or Ef repository
-            services.AddScoped<IAnimalRepository, CsvAnimalRepository>();
-            //services.AddScoped<IAnimalRepository, EfAnimalRepository>();
+            //services.AddScoped<IAnimalRepository, CsvAnimalRepository>();
+            services.AddScoped<IAnimalRepository, EfAnimalRepository>();
 
             services.AddScoped<ISorter, MergeSorter>();
 

@@ -126,11 +126,17 @@ static IResult? TryParseEnum<TEnum>(
     });
 }
 
-// Apply migrations
-using (var scope = app.Services.CreateScope())
+// Apply migrations if container is available
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<RescueAnimalDbContext>();
     await db.Database.MigrateAsync();
+}
+catch (Exception ex)
+{
+    // Container is not available
+    Console.WriteLine(ex);
 }
 
 app.Run();
