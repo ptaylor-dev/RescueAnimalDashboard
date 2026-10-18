@@ -10,11 +10,12 @@
 
 <AnimalTable
     SelectedAnimalChanged="OnSelectedAnimalChanged"/>
-<div class="d-flex">
-    <div class="col-sm-12 col-md-6">
+<div class="d-flex flex-wrap dashboard-visuals">
+    <div class="col-12 col-md-6 dashboard-panel">
         <AnimalBreedChart />
     </div>
-    <div class="col-sm-12 col-md-6">
+
+    <div class="col-12 col-md-6 dashboard-panel">
         <AnimalMap SelectedAnimal="State.SelectedAnimal" />
     </div>
 </div>

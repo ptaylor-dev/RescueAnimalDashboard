@@ -56,7 +56,7 @@ app.MapGet("/health", () => Results.Ok(new
     status = "ok"
 }));
 
-// Parameterized database query
+// Query with endpoint parameter binding
 app.MapGet("/animals", async (
     string? rescueType,
     string? searchText,

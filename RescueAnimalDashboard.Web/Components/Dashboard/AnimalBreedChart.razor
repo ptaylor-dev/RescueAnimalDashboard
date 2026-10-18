@@ -9,7 +9,7 @@
     ChartSeries="@_series" 
     ChartLabels="@_xAxisLabels"
     ChartOptions="@_options"
-    Width="100%" Height="100%" />
+    Width="100%" Height="450px" />
 
 @code {
     private const int NumberOfRecords = 25;
@@ -34,7 +34,7 @@
 
     private string?[] _xAxisLabels = { };
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         State.OnChange += HandleDashboardStateHasChanged;
         CountBreeds();
@@ -42,7 +42,7 @@
 
     public void Dispose()
     {
-        State.OnChange -= StateHasChanged;
+        State.OnChange -= HandleDashboardStateHasChanged;
     }
 
     private void HandleDashboardStateHasChanged()

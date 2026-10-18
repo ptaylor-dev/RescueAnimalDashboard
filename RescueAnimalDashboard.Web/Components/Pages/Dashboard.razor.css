@@ -2,3 +2,13 @@
 .mud-table-dense .mud-table-cell {
     padding: 4px 8px !important;
 }
+
+.dashboard-visuals {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.dashboard-panel {
+    min-width: 0;
+    max-width: 100%;
+}

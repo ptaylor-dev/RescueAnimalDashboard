@@ -11,6 +11,7 @@
 @inject ILogger<AnimalTable> Logger
 
 <MudTable T="Animal"
+          Class="animal-table"
           @ref="_table"
           ServerData="LoadAnimals"
           RowsPerPage="10"
